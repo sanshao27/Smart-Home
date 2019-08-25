@@ -1,0 +1,25 @@
+日期：2019/07/20
+
+一.实现目标：
+通过GSM短信设置在家模式，离家模式，获取平台的传感器信息。
+
+二.实现方案：
+
+
+三.遇到的问题：
+GSM异常处理：由于采用while((USART_RX2_STA&0x8000)==0);方式等待ISM800的反馈，
+当ISM800C中途断电，将导致GSM相关线程陷入死循环。
+
+四.解决方案：
+采用获取系统滴答时钟的方式,如下：
+current_tick=rt_tick_get();
+while((USART_RX2_STA&0x8000)==0)
+{
+       if((rt_tick_get()-current_tick)>50)
+	{
+	    rt_kprintf("等待ISM800C反馈超时！\n");
+	    rt_free(prt_backup);
+	    return;
+	}
+}
+五.改进计划：

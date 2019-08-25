@@ -1,0 +1,11 @@
+.\build\24cxx.o: applications\24cxx.c
+.\build\24cxx.o: applications\24cxx.h
+.\build\24cxx.o: applications\sys.h
+.\build\24cxx.o: Libraries\CMSIS\Device\ST\STM32F1xx\Include\stm32f103xe.h
+.\build\24cxx.o: Libraries\CMSIS\Include\core_cm3.h
+.\build\24cxx.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\build\24cxx.o: Libraries\CMSIS\Include\core_cmInstr.h
+.\build\24cxx.o: Libraries\CMSIS\Include\cmsis_armcc.h
+.\build\24cxx.o: Libraries\CMSIS\Include\core_cmFunc.h
+.\build\24cxx.o: Libraries\CMSIS\Device\ST\STM32F1xx\Include\system_stm32f1xx.h
+.\build\24cxx.o: applications\myiic.h

@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>智能家居管理平台</title>
+<style type="text/css">
+
+.ul1{margin:0;padding:0; list-style:none;}
+.li1{
+	margin: 0;
+	padding: 1;
+	list-style: none;
+}
+.menu{width:1000px;height:48px;margin:0 auto; background:url(image/tab.jpg) repeat-x; }
+.menu ul{width:1000px;float:left;height:48px;display:inline;}
+.menu ul li{width:200px;height:48px; line-height:48px; text-align:center; float:left;display:inline; }
+.menu ul li a{width:200px;height:48px; float:left;text-decoration:none; color:#fff; font-size:18px;font-weight:bold;}
+.menu ul li a:hover{ background:#FF0000 repeat-x; }		
+
+.logo{}
+.bodystyle{  margin:0 auto; width:1000px; background:#d5d5d7;}
+ 
+</style>
+  
+</head>
+<body class="bodystyle">
+<div style="background-color:#FFFFFF;">
+
+<div style="margin-top: 0px; background-color: 0xfff;">
+  <h1 align="center"><strong>智能家居管理平台</strong></h1>
+</div>
+ 
+</div>
+ 
+<div class="menu">
+	<ul class="ul1">
+<li class="li1"><a href="index.html">主页</a></li>
+        <li class="li1"><a href="modehome.shtml">远程设置</a></li>
+        <li class="li1"><a href="STM32F407ADC_TEMPERATE.shtml">传感器状态</a></li>
+<li class="li1"><a href="STM32F407RTC.shtml">RTC实时时钟</a></li>
+         <li class="li1"><a href="404.html">系统状态</a></li>
+<div style="margin-top:0px;">
+  <p>此页面用来控制照明，警报和系统模式</p>
+</div>
+
+<div style="width:1000px; background-color:#0066CC;color:#fff; ">
+    <h3 align="center">
+  <span style="text-align:center;">系统模式设置</span></h3>
+</div>
+
+<div style=" text-align:center;">
+<form method="get" action="/mode.cgi">
+   Mode:
+      <input name="Mode" type="radio" id="Home_1" value="Home" checked="checked"   >Home
+      <input name="Mode" type="radio" id="Out_1" value="Out">Out<BR>
+<br>
+  <input type="submit" name="button1" id="button1" value="SEND">
+</form>
+</div>
+
+<div style="width:1000px; background-color:#0066CC;color:#fff; ">
+                <h3 align="center">
+                  <span style="text-align:center;">报警控制</span>
+                </h3>
+</div>
+
+<div style=" text-align:center;">
+<form name="form1" method="get" action="/beep.cgi">
+  BEEP:
+ <input type="radio" name="BEEP" value="BEEPON" id="BEEP_0" >ON 
+ <input name="BEEP" type="radio" id="BEEP_1" value="BEEPOFF" checked>OFF<BR> <BR>
+    <input type="submit" name="button2" id="button2" value="SEND">
+</form></div>
+
+<div style="width:1000px; background-color:#0066CC;color:#fff;">
+                <h3 align="center">
+                  <span style="text-align:center;">卧室灯控制</span>
+                </h3>
+</div>
+<div style= text-align:center;">
+<form method="get" action="/leds.cgi">
+   light:
+    <input type="radio" name="light" value="Bedroom_lightON" id="Bedroom_light_0">ON
+      <input name="light" type="radio" id="Bedroom_light_1" value="Bedroom_lightOFF" checked>OFF<BR>
+<br>
+  <input type="submit" name="button3" id="button3" value="SEND">
+</form></div>
+
+<div style="width:1000px; background-color:#0066CC;color:#fff;"></div>
+<div style= text-align:center;"></div>
+
+<div style="width:1000px; background-color:#0066CC;color:#fff;">
+                <h3 align="center">
+                  <span style="text-align:center;">走廊灯控制</span>
+                </h3>
+</div>
+<div style= text-align:center;">
+<form method="get" action="/leds.cgi">
+   light:
+    <input name="light" type="radio" id="Corridor_light_0" value="Corridor_lightON" checked="checked">ON
+    <input name="light" type="radio" id="Corridor_light_1" value="Corridor_lightOFF">OFF<BR>
+<br>
+  <input type="submit" name="button5" id="button5" value="SEND">
+</form></div>
+
+<div style="width:1000px; background-color:#0066CC;color:#fff;"></div>
+<div style= text-align:center;"></div>
+</body>
+</html>
