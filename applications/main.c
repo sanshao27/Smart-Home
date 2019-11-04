@@ -74,12 +74,15 @@ rt_sem_t GSM_sem_read = RT_NULL;
 //定时器控制块变量声明---运行定时器会造成GSM信息发送失败
 //rt_timer_t timer1_sensor_Status = RT_NULL;
 /******************************创建邮箱********************/
+
 //用于GSM_SendSMS线程的消息传递
 static struct rt_mailbox GSM_mq_send;
 static char mq_pool[16];
+
 //用于红外遥控到NRF的消息传递
 static struct rt_mailbox IRDA_NRF2401_send;
 static char IRDA_NRF2401_pool[16];
+
 /******************************创建各个功能线程*****************/
 //用于接收来自触摸屏和红外遥控发来的邮箱信息
 //根据信息的内容将相应的指令通过主机的NRF2401发送到从机的NRF2401来执行相应的操作
@@ -185,9 +188,9 @@ static void GSM_send_thread(void *parameter)
 		if(rt_mb_recv(&GSM_mq_send,&val,RT_WAITING_FOREVER)==RT_EOK)
 		{
 			printf("val:%ld\n",val); 
-			rt_enter_critical(); //禁止系统调度
+			rt_enter_critical(); //禁止系统调度,必须禁止调度否则将导致消息发送失败
 			GSM_SendSMS((uint8_t)val); 
-			rt_exit_critical();  //启动系统调度
+			rt_exit_critical();  //恢复系统调度
 		}
 		rt_thread_mdelay(200);//设置为200，无法正常接收短信并执行GSM_SendSMS，禁止系统调度后OK
 	}
@@ -327,7 +330,7 @@ static void GSM_read_thread(void *parameter)
 						rt_mb_send(&GSM_mq_send,set_ok);//反馈设置状态给用户
 					else
 						rt_mb_send(&GSM_mq_send,set_Err);
-					rt_exit_critical(); //开发系统调度
+					rt_exit_critical(); //开放系统调度
 					goto LOOP;
 				}
 			   rt_kprintf("判断是否收到out\n");
@@ -453,6 +456,7 @@ static void security_thread(void *parameter)
 			//判断是否有人闯入
 			if(RSD_STATUS|WB_STATUS)
 			{
+				rt_mb_send(&GSM_mq_send,Invaiding);
 				BEEP = 1;//启动声光报警
 				RED_LED   = 0;
 				rt_thread_mdelay(200);
@@ -465,20 +469,26 @@ static void security_thread(void *parameter)
 			}
 		}
 		//判断煤气情况
-		//rt_sem_take(mq_sem,RT_WAITING_FOREVER);
 		if((mq<=3.4)&&(mq>=0.3))
 		{
+			rt_mb_send(&GSM_mq_send,MQ_LEAKING);//通过短信发送煤气泄漏信息给用户
 			BEEP = 1;   //启动声光报警
 			RED_LED   = 0;
 			rt_thread_mdelay(150);
 			BEEP = 0;
 			RED_LED   = 1;
 		}
-		else
+		//判断火灾情况
+		if((hz<=1.0)&&(hz!=0))
 		{
-			;
+			printf("hz= %f\n",hz);
+			rt_mb_send(&GSM_mq_send,On_Fire);//通过短信发送火灾信息给用户
+			BEEP = 1;   //启动声光报警
+			RED_LED   = 0;
+			rt_thread_mdelay(150);
+			BEEP = 0;
+			RED_LED   = 1;
 		}
-		//rt_sem_release(mq_sem);
 		rt_thread_mdelay(50);
 	}
 }
@@ -589,7 +599,7 @@ static void Corridor_Light_thread(void *parameter)
 				{
 					rt_enter_critical();//防止颜色显示过程被打断
 					POINT_COLOR =RED;
-					CORRIDOR_LIGHT = 0;
+					CORRIDOR_LIGHT = 0; //打开走廊灯
 					//灯的状态同步到LCD
 					LCD_ShowString(0,272,200,16,16,"Corridor   Light:     ON ");
 					rt_exit_critical(); 
@@ -628,16 +638,6 @@ static void Get_Sensor_Status_thread(void *parameter)
 {
 	while(1)
 	{
-	  //火灾传感器值
-	  hz = get_aver_val(5,HZ);
-	  sprintf(HZ_buffer,"%d.%.2d",(uint8_t)hz,(uint8_t)Get_decimal(hz,2));
-	  //若煤气值大于0.4以红色显示，否则以绿色显示
-	  if(hz>=0.3)
-	    POINT_COLOR =RED;
-	  else
-		POINT_COLOR =GREEN;
-	  LCD_ShowString(105,158,200,16,16,HZ_buffer);
-	  
 	  //获取光敏传感器值
 	  LS1_VAL = get_aver_val(5,LS1);
 	  //获取温湿度值
@@ -649,14 +649,15 @@ static void Get_Sensor_Status_thread(void *parameter)
 	    POINT_COLOR =GREEN;
 	  else
 		POINT_COLOR =RED;
-	  LCD_ShowString(105,124,200,16,16,temp_buffer);
+	  LCD_ShowString(105,124,200,16,16,temp_buffer);//更新到LCD
 	  //将湿度值转换为字符串
 	  sprintf(humi_buffer,"%d%%",humi);
+	   //判断湿度是否在45%~65%度之间，是则以绿色显示温度值，否则以红色显示
 	  if((humi>=45)&&(humi<=65))
 	    POINT_COLOR =GREEN;
 	  else
 		POINT_COLOR =RED;
-	  LCD_ShowString(105,142,200,16,16,humi_buffer);
+	  LCD_ShowString(105,142,200,16,16,humi_buffer);//更新到LCD
      
 	  //获取煤气值
 	  mq = get_aver_val(5,MQ);
@@ -666,8 +667,19 @@ static void Get_Sensor_Status_thread(void *parameter)
 	    POINT_COLOR =RED;
 	  else
 		POINT_COLOR =GREEN;
-	  LCD_ShowString(105,176,200,16,16,MQ_buffer);
-	  rt_thread_mdelay(500);//200ms更新一次
+	  LCD_ShowString(105,176,200,16,16,MQ_buffer);//更新到LCD
+	  
+	  //火灾传感器值
+	  hz = get_aver_val(15,HZ);
+	  //printf("hz = %f\n",hz);
+	  sprintf(HZ_buffer,"%d.%.2d",(uint8_t)hz,(uint8_t)Get_decimal(hz,2));
+	  //若火灾值大于1以绿色显示，否则以红色显示
+	  if(hz>=1.0)
+	    POINT_COLOR =GREEN;
+	  else
+		POINT_COLOR =RED;
+	  LCD_ShowString(105,158,200,16,16,HZ_buffer); //更新到LCD
+	  rt_thread_mdelay(200);                       //200ms更新一次
      }
 }
 
@@ -740,7 +752,7 @@ int Smart_IOT_Center(void)
 							 RT_NULL,
 							 &touch_thread_stack[0],
 							 sizeof(touch_thread_stack),
-							 THREAD_PRIORITY+8,
+							 5,
 							 THREAD_TIMESLICE  	
 							);
 	//启动触摸线程 
@@ -760,20 +772,21 @@ int Smart_IOT_Center(void)
 	//启动照明线程
 	if(result==RT_EOK)
 	rt_thread_startup(&Light_Thread);
-											
-	//创建安防线程
-    result = rt_thread_init( &Security_Thread,
-							"security_thread",
-							 security_thread,
+	
+    //创建传感器状态获取线程
+    result = rt_thread_init( &Get_Sensor_Status_Thread,
+							"Get_Sensor_Status_Thread",
+							 Get_Sensor_Status_thread,
 							 RT_NULL,
-							 &Security_thread_stack[0],
-							 sizeof(Security_thread_stack),
+							 &Get_Sensor_Status_Thread_stack[0],
+							 sizeof(Get_Sensor_Status_Thread_stack),
 							 THREAD_PRIORITY-2,
 							 THREAD_TIMESLICE  	
 							);
-	//启动安防线程 
+	//传感器状态获取线程
 	if(result==RT_EOK)
-	rt_thread_startup(&Security_Thread);
+	rt_thread_startup(&Get_Sensor_Status_Thread);	
+	
 	
 	//创建红外检测线程
     result = rt_thread_init( &IRDA_Thread,
@@ -830,20 +843,20 @@ int Smart_IOT_Center(void)
 	//启动GSM读取信息线程
 	if(result==RT_EOK)
 	rt_thread_startup(&GSM_Thread_Send);
-	
-	//创建传感器状态获取线程
-    result = rt_thread_init( &Get_Sensor_Status_Thread,
-							"Get_Sensor_Status_Thread",
-							 Get_Sensor_Status_thread,
+	//创建安防线程
+    result = rt_thread_init( &Security_Thread,
+							"security_thread",
+							 security_thread,
 							 RT_NULL,
-							 &Get_Sensor_Status_Thread_stack[0],
-							 sizeof(Get_Sensor_Status_Thread_stack),
+							 &Security_thread_stack[0],
+							 sizeof(Security_thread_stack),
 							 THREAD_PRIORITY+14,
 							 THREAD_TIMESLICE  	
 							);
-	//传感器状态获取线程
+	//启动安防线程 
 	if(result==RT_EOK)
-	rt_thread_startup(&Get_Sensor_Status_Thread);
+	rt_thread_startup(&Security_Thread);
+	
 	return 0;
 }
 

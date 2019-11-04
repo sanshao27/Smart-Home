@@ -138,7 +138,7 @@ void GSM_SendSMS(uint8_t content)
 	prt_backup = prt;
 	//检测ISM800C是否可用,不可用则直接退出发送程序
 	usart2_senddata("AT\n");
-	//采用获取系统tick方式判断是否超时，避免意外死循环 
+	//等待反馈，采用获取系统tick方式判断是否超时，避免意外死循环 
 	current_tick=rt_tick_get();
 	while((USART_RX2_STA&0x8000)==0)
 	{
@@ -161,7 +161,7 @@ void GSM_SendSMS(uint8_t content)
 	memset((uint8_t*)USART_RX2_BUF,0,sizeof(USART_RX2_BUF));
 	//设置发送信息指令
 	usart2_senddata("AT+CMGF=1\n");
-	//采用获取系统tick方式判断是否超时，避免意外死循环 
+	//等待反馈，采用获取系统tick方式判断是否超时，避免意外死循环 
 	current_tick=rt_tick_get();
 	while((USART_RX2_STA&0x8000)==0)
 	{
@@ -178,7 +178,7 @@ void GSM_SendSMS(uint8_t content)
 	printf("USART_RX2_BUF：%s\n",USART_RX2_BUF);
 	
 	usart2_senddata("AT+CSCS=\"GSM\"\n");
-	//采用获取系统tick方式判断是否超时，避免意外死循环 
+	//等待反馈，采用获取系统tick方式判断是否超时，避免意外死循环 
 	current_tick=rt_tick_get();
 	while((USART_RX2_STA&0x8000)==0)
 	{
@@ -195,7 +195,7 @@ void GSM_SendSMS(uint8_t content)
 	printf("USART_RX2_BUF：%s\n",USART_RX2_BUF);
 	
 	usart2_senddata("AT+CNMI=2,1\n");
-	//采用获取系统tick方式判断是否超时，避免意外死循环 
+	//等待反馈，采用获取系统tick方式判断是否超时，避免意外死循环 
 	current_tick=rt_tick_get();
 	while((USART_RX2_STA&0x8000)==0)
 	{
@@ -211,7 +211,7 @@ void GSM_SendSMS(uint8_t content)
 	USART_RX2_STA = 0;	
 	printf("USART_RX2_BUF：%s\n",USART_RX2_BUF);
 	usart2_senddata("AT+CMGS=\"17511681733\"\n");
-	//采用获取系统tick方式判断是否超时，避免意外死循环 
+	//等待反馈，采用获取系统tick方式判断是否超时，避免意外死循环 
 	current_tick=rt_tick_get();
 	while((USART_RX2_STA&0x8000)==0)
 	{
@@ -241,7 +241,7 @@ void GSM_SendSMS(uint8_t content)
 				sprintf(temp_buffer,"Temperature:%d'C\n",temp);
 				usart2_senddata(temp_buffer);
 				current_tick=rt_tick_get();
-				//采用获取系统tick方式判断是否超时，避免意外死循环 
+				//等待反馈，采用获取系统tick方式判断是否超时，避免意外死循环 
 				while((USART_RX2_STA&0x8000)==0)
 				{
 					if((rt_tick_get()-current_tick)>100000)
@@ -258,7 +258,7 @@ void GSM_SendSMS(uint8_t content)
 				sprintf(humi_buffer,"Humidity:%d%%\n",humi);
 				usart2_senddata(humi_buffer);
 				current_tick=rt_tick_get();
-				//采用获取系统tick方式判断是否超时，避免意外死循环 
+				//等待反馈，采用获取系统tick方式判断是否超时，避免意外死循环 
 				while((USART_RX2_STA&0x8000)==0)
 				{
 					if((rt_tick_get()-current_tick)>100000)
@@ -275,7 +275,7 @@ void GSM_SendSMS(uint8_t content)
 				sprintf(MQ_buffer,  "M       Q:%d.%.2d\n",(uint8_t)mq,(uint8_t)Get_decimal(mq,2)); 
 				usart2_senddata(MQ_buffer);
 				current_tick=rt_tick_get();
-				//采用获取系统tick方式判断是否超时，避免意外死循环 
+				//等待反馈，采用获取系统tick方式判断是否超时，避免意外死循环 
 				while((USART_RX2_STA&0x8000)==0)
 				{
 					if((rt_tick_get()-current_tick)>100000)
@@ -296,7 +296,7 @@ void GSM_SendSMS(uint8_t content)
 			{
 				usart2_senddata("set_ok");
 				current_tick=rt_tick_get();
-				//采用获取系统tick方式判断是否超时，避免意外死循环 
+				//等待反馈，采用获取系统tick方式判断是否超时，避免意外死循环 
 				while((USART_RX2_STA&0x8000)==0)
 				{
 					if((rt_tick_get()-current_tick)>100000)
@@ -338,7 +338,7 @@ void GSM_SendSMS(uint8_t content)
 			{
 				usart2_senddata("MQ_LEAKING");
 				current_tick=rt_tick_get();
-				//采用获取系统tick方式判断是否超时，避免意外死循环 
+				//等待反馈，采用获取系统tick方式判断是否超时，避免意外死循环 
 				while((USART_RX2_STA&0x8000)==0)
 				{
 					if((rt_tick_get()-current_tick)>100000)
@@ -359,7 +359,28 @@ void GSM_SendSMS(uint8_t content)
 			{
 				usart2_senddata("Invaiding");
 				current_tick=rt_tick_get();
-				//采用获取系统tick方式判断是否超时，避免意外死循环 
+				//等待反馈，采用获取系统tick方式判断是否超时，避免意外死循环 
+				while((USART_RX2_STA&0x8000)==0)
+				{
+					if((rt_tick_get()-current_tick)>100000)
+					{
+						rt_kprintf("等待ISM800C反馈超时！\n");
+						rt_free(prt_backup);
+						prt = RT_NULL;
+						prt_backup= RT_NULL;
+						return;
+					}
+				}
+				USART_RX2_STA = 0;
+				printf("22USART_RX2_BUF：%s\n",USART_RX2_BUF);
+				break;
+			}
+			//火灾信息
+			case On_Fire:
+			{
+				usart2_senddata("On_Fire");
+				current_tick=rt_tick_get();
+				//等待反馈，采用获取系统tick方式判断是否超时，避免意外死循环 
 				while((USART_RX2_STA&0x8000)==0)
 				{
 					if((rt_tick_get()-current_tick)>100000)
@@ -380,7 +401,7 @@ void GSM_SendSMS(uint8_t content)
 			{
 				usart2_senddata("Wrong Command!!\n");
 				current_tick=rt_tick_get();
-				//采用获取系统tick方式判断是否超时，避免意外死循环 
+				//等待反馈，采用获取系统tick方式判断是否超时，避免意外死循环 
 				while((USART_RX2_STA&0x8000)==0)
 				{
 					if((rt_tick_get()-current_tick)>100000)
@@ -395,7 +416,7 @@ void GSM_SendSMS(uint8_t content)
 				USART_RX2_STA = 0;
 				usart2_senddata("1.Send \"report status\"to get sensor status.\n");
 				current_tick=rt_tick_get();
-				//采用获取系统tick方式判断是否超时，避免意外死循环 
+				//等待反馈，采用获取系统tick方式判断是否超时，避免意外死循环 
 				while((USART_RX2_STA&0x8000)==0)
 				{
 					if((rt_tick_get()-current_tick)>100000)
@@ -410,7 +431,7 @@ void GSM_SendSMS(uint8_t content)
 				USART_RX2_STA = 0;
 				usart2_senddata("2.Send \"out\"to set OUT mode.\n");
 				current_tick=rt_tick_get();
-				//采用获取系统tick方式判断是否超时，避免意外死循环 
+				//等待反馈，采用获取系统tick方式判断是否超时，避免意外死循环 
 				while((USART_RX2_STA&0x8000)==0)
 				{
 					if((rt_tick_get()-current_tick)>100000)
@@ -424,7 +445,7 @@ void GSM_SendSMS(uint8_t content)
 				}
 				USART_RX2_STA = 0;
 				usart2_senddata("3.Send \"home\"to set HOME mode.\n");
-				//采用获取系统tick方式判断是否超时，避免意外死循环 
+				//等待反馈，采用获取系统tick方式判断是否超时，避免意外死循环 
 				current_tick=rt_tick_get();
 				while((USART_RX2_STA&0x8000)==0)
 				{
@@ -449,9 +470,8 @@ void GSM_SendSMS(uint8_t content)
 		usart2_senddata((char*)cmd_1A);
 		//获取反馈信息
 		memset((uint8_t*)USART_RX2_BUF,0,sizeof(USART_RX2_BUF));
-		//等待反馈信息
-		//while((USART_RX2_STA&0x8000)==0);//使用定时器会造成信息发送失败(rt_timer_t),原因待解
-		//采用获取系统tick方式判断是否超时，避免意外死循环 
+		 
+		//等待反馈，采用获取系统tick方式判断是否超时，避免意外死循环 
 		current_tick=rt_tick_get();
 		while((USART_RX2_STA&0x8000)==0)
 		{
@@ -467,7 +487,7 @@ void GSM_SendSMS(uint8_t content)
 		printf("等待时长为:%ldms\n",(rt_tick_get()-current_tick));
 		USART_RX2_STA = 0;
 		printf("11USART_RX2_BUF：%s\n",USART_RX2_BUF);
-		//判断是否收到反馈信息
+		//判断是否收到发送OK反馈信息
 	    prt= rt_strstr((char*)USART_RX2_BUF,"+CMGS: ");
 		printf("prt:%p\n",prt);
 	    if(prt!=RT_NULL)

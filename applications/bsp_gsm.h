@@ -11,6 +11,7 @@
 #define MQ_LEAKING    66
 #define Invaiding     77
 #define tips          88
+#define On_Fire       99
 
 //º¯ÊıÉùÃ÷
 int scm800c_init(void);

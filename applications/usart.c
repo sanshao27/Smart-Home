@@ -93,7 +93,7 @@ void uart2_init(uint32_t bound)
 	if(HAL_UART_Init(&UART2_Handler)==HAL_OK)			//HAL_UART_Init()会使能UART1
 		printf("\nuart2 Initilized!\n");
 	HAL_UART_Receive_IT(&UART2_Handler, (uint8_t *)aRx2Buffer, RXBUFFERSIZE);//该函数会开启接收中断：标志位UART_IT_RXNE，并且设置接收缓冲以及接收缓冲接收最大数据量
-    TIM5_Init(19999,35); //定时20ms,时间不能太短，否则不能正确接收比较长的的不定长信息
+    TIM5_Init(29999,35); //定时30ms,时间不能太短，否则不能正确接收比较长的的不定长信息
 }
 
 //UART底层初始化，时钟使能，引脚配置，中断配置

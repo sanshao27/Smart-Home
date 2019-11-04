@@ -384,10 +384,10 @@ struct pbuf *DM9000_Receive_Packet(void)
 	uint16_t dummy; 
 	int len;
 	p=NULL; 
-	rt_sem_take(dm9000lock,RT_WAITING_FOREVER); 				//请求信号量,锁定DM9000
+	rt_sem_take(dm9000lock,RT_WAITING_FOREVER); 	//请求信号量,锁定DM9000
 __error_retry:	
 	DM9000_ReadReg(DM9000_MRCMDX);					//假读
-	rxbyte=(uint8_t)DM9000->DATA;						//进行第二次读取 
+	rxbyte=(uint8_t)DM9000->DATA;				    //进行第二次读取 
 	if(rxbyte)										//接收到数据
 	{
 		if(rxbyte>1)								//rxbyte大于1，接收到的数据错误,挂了		

@@ -32,8 +32,8 @@
 	<ul class="ul1">
     	<li class="li1"><a href="index.html">主页</a></li>
         <li class="li1"><a href="modehome.shtml">远程设置</a></li>
-<li class="li1"><a href="STM32F407ADC_TEMPERATE.shtml">传感器状态</a></li>
-<li class="li1"><a href="STM32F407RTC.shtml">RTC实时时钟</a></li>
+<li class="li1"><a href="STM32F103_ADC_sensor_status.shtml">传感器状态</a></li>
+<li class="li1"><a href="STM32F103_RTC.shtml">RTC实时时钟</a></li>
          <li class="li1"><a href="404.html">系统状态</a></li>
 <div style="margin-top:30px;">
   此页面用来显示系统实时时间。
